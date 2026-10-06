@@ -17,3 +17,9 @@ export const SALT=parseInt(process.env.SALT)
 
 export const ENCRYPTION_KEY=Buffer.from(process.env.ENCRYPTION_KEY)
 export const IVLENGTH=parseInt(process.env.IVLENGTH)
+
+
+export const KEY_ACCESS=process.env.KEY_ACCESS
+export const KEY_REFRESH=process.env.KEY_REFRESH
+
+

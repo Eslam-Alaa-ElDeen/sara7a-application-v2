@@ -1,15 +1,18 @@
 import { compare } from "bcrypt";
-import { SALT } from "../../../config/config.service.js";
+import { KEY_ACCESS, KEY_REFRESH, SALT } from "../../../config/config.service.js";
 import { Decrypt, Encrypt } from "../../common/security/encryption.security.js";
 import { Compare, Hash } from "../../common/security/hash.security.js";
 import { create, findOne } from "../../DB/base.repository.js"
 import { userModel } from "../../DB/model/user.model.js"
+import jwt from 'jsonwebtoken'
+import joi from "joi"
 
 // import { users } from '../../DB/model/index.js'
 export const signup = async(req, res, next) => {
     try {
+
+
         const {fName,lName,email,password,phone,gender,DOB,age}=req.body;
-        console.log({fName,lName,email,password,phone,gender,DOB,age});
 
       const ExistUser=await findOne({model:userModel,filter:{email:email}})
 
@@ -36,7 +39,6 @@ export const signup = async(req, res, next) => {
 export const login=async(req, res, next) => {
     try {
       const {email,password}=req.body;
-      console.log( {email,password});
       const ExistUser=await findOne({model:userModel,filter:{email:email}})
 
       if (!ExistUser) {
@@ -47,8 +49,28 @@ export const login=async(req, res, next) => {
         throw new Error("password not matched",{cause:{status:404}})
     
       ExistUser.phone=await Decrypt(ExistUser.phone)
-      res.status(200).json({ExistUser})
+
+      const access_token=jwt.sign({
+        id:ExistUser._id
+      },KEY_ACCESS,{
+        expiresIn:300,
+        issuer:"https://localhost:3000"
+      })
+
+      const refresh_token=jwt.sign({
+        id:ExistUser._id
+      },KEY_REFRESH,{
+        expiresIn:300,
+        issuer:"https://localhost:3000"
+      })
+      res.status(200).json({tokens:{access_token,refresh_token}})
     } catch (error) {
       res.status(404).json({msg:error.message})
     }
+}
+
+export const profile=async(req,res,next)=>{
+  
+
+  res.status(200).json({user:req.user})
 }
