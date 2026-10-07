@@ -3,8 +3,12 @@ import { connectionDB } from "./DB/connection.db.js";
 import { globalErrorHandling } from "./middleware/index.js";
 import {  userRouter } from "./modules/index.js";
 import express from "express";
+import cors from "cors"
 
 const app = express();
+app.use(cors({
+  origin:"*"
+}))
 app.use(express.json());
 
 connectionDB()

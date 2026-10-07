@@ -6,6 +6,8 @@ import { create, findOne } from "../../DB/base.repository.js"
 import { userModel } from "../../DB/model/user.model.js"
 import jwt from 'jsonwebtoken'
 import joi from "joi"
+import {OAuth2Client} from 'google-auth-library';
+const client=new OAuth2Client();
 
 // import { users } from '../../DB/model/index.js'
 export const signup = async(req, res, next) => {
@@ -30,6 +32,57 @@ export const signup = async(req, res, next) => {
 
       })
       res.status(200).json({data})
+    } catch (error) {
+      res.status(404).json({msg:error.message})
+    }
+}
+export const signupWithGmail = async(req, res, next) => {
+    try {
+      const{idToken}=req.body;
+
+      const ticket = await client.verifyIdToken({
+          idToken,
+          audience:"867768865965-l6sk69spvkgncdj1ni3oc3tphi8nk00b.apps.googleusercontent.com",
+      });
+      const {family_name,given_name,email,email_verified,picture} = ticket.getPayload();
+
+      let user=await findOne({
+        model:userModel,
+        filter:{email:email.toLowerCase()}
+      })
+
+      if(!user){
+        user=await create({
+            model:userModel,
+            data:{
+              fName:given_name,
+              lName:family_name,
+              email,
+              profileImage:picture,
+              isConfirmed:email_verified,
+              provider:"google"
+            }
+          })
+        }
+        if(user.provider=="system")
+          throw new Error("pls login with system",{cause:{status:400}})
+      
+      const access_token=jwt.sign({
+        id:user._id
+      },KEY_ACCESS,{
+        expiresIn:300,
+        issuer:"https://localhost:3000"
+      })
+
+      const refresh_token=jwt.sign({
+        id:user._id
+      },KEY_REFRESH,{
+        expiresIn:300,
+        issuer:"https://localhost:3000"
+      })
+
+      res.status(200).json({message:"done",access_token,refresh_token})
+
     } catch (error) {
       res.status(404).json({msg:error.message})
     }

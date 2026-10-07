@@ -14,7 +14,7 @@ const userSchema=new mongoose.Schema({
         type:String,
         required:true,
         minLength:2,
-        maxLenght:10,
+        maxLength:10,
         trim:true
     },
     email:{
@@ -24,11 +24,15 @@ const userSchema=new mongoose.Schema({
     },
     password:{
         type:String,
-        required:true,
+        required:function(){
+            return this.provider=="system"?true:false
+        }
     },
     age:{
         type:Number,
-        required:true
+        required:function(){
+            return this.provider=="system"?true:false
+        }
     },
     gender:{
         type:String,
@@ -48,6 +52,9 @@ const userSchema=new mongoose.Schema({
         type:Boolean,
         default:false
     },phone:{
+        type:String
+    },
+    profileImage:{
         type:String
     }
 

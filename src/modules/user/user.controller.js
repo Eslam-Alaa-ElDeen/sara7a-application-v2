@@ -2,7 +2,7 @@ import { RoleEnum } from "../../common/enum/user.enum.js";
 import { userModel } from "../../DB/model/user.model.js";
 import { authentication } from "../../middleware/authentication.middleware.js";
 import { authorization } from "../../middleware/authorization.middleware.js";
-import {  login, profile, signup } from "./user.service.js";
+import {  login, profile, signup, signupWithGmail } from "./user.service.js";
 import { Router } from "express";
 import express from "express"
 import { Validation } from "../../middleware/validation.middleware.js";
@@ -12,6 +12,7 @@ const router = Router();
 
 
 router.post("/signup",Validation(signupSchema),signup );
+router.post("/signup/gmail",signupWithGmail );
 
 router.post("/login",Validation(loginSchema),login );
 
