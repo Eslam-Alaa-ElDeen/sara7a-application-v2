@@ -4,7 +4,8 @@
   "main": "./src/main.js",
   "type": "module",
   "scripts": {
-    "start:dev": "cross-env NODE_ENV=development  node --watch-path=. ./src/main.js",
+    "start:dev": "cross-env NODE_ENV=development  nodemon --watch-path=. ./src/main.js",
+    "start": "cross-env NODE_ENV=development  node  ./src/main.js",
     "start:prod": "cross-env NODE_ENV=production  node  ./src/main.js"
   },
   "keywords": [],
@@ -20,6 +21,7 @@
     "google-auth-library": "^11.2.0",
     "joi": "^18.2.9",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.10.2"
+    "mongoose": "^9.10.2",
+    "multer": "^2.4.0"
   }
 }

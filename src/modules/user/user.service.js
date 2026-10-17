@@ -12,15 +12,19 @@ const client=new OAuth2Client();
 // import { users } from '../../DB/model/index.js'
 export const signup = async(req, res, next) => {
     try {
-
-
-        const {fName,lName,email,password,phone,gender,DOB,age}=req.body;
+      const {fName,lName,email,password,phone,gender,DOB,age}=req.body;
 
       const ExistUser=await findOne({model:userModel,filter:{email:email}})
 
       if (ExistUser) {
         throw new Error("email already exist",{cause:{status:407}})
       }
+
+      const path_cover=[];
+      for(const file of req.files.attachments){
+        path_cover.push(file.path)
+      }
+
       const data=await create({
         model:userModel,
         data:{
@@ -28,8 +32,12 @@ export const signup = async(req, res, next) => {
         email,
         password:await Hash(password,SALT)
         ,phone:await Encrypt(phone)
-        ,gender,DOB,age}
-
+        ,gender
+        ,DOB
+        ,age
+        ,profileImage:req.files.attachment[0].path
+        ,coverImage:path_cover
+      }
       })
       res.status(200).json({data})
     } catch (error) {

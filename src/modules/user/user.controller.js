@@ -7,11 +7,15 @@ import { Router } from "express";
 import express from "express"
 import { Validation } from "../../middleware/validation.middleware.js";
 import { loginSchema, signupSchema } from "./user.validation.js";
+import { multerLocal } from "../../middleware/multer.middleware.js";
 const router = Router();
 
 
 
-router.post("/signup",Validation(signupSchema),signup );
+router.post("/signup",multerLocal({customPath:"admin/3mk_eslam",customTypes:["image/png","image/jpg","image.jpg","image/jpeg"]}).fields([
+    {name:"attachment",max:1},
+    {name:"attachments",max:6}
+]),Validation(signupSchema),signup );
 router.post("/signup/gmail",signupWithGmail );
 
 router.post("/login",Validation(loginSchema),login );

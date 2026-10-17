@@ -10,12 +10,12 @@ export const signupSchema ={
         age:joi.number().min(20).max(80).integer().positive().required(),
         phone:joi.string().length(11).required(),
         gender:joi.string().required().valid('male','female'),
-        role:joi.string().required().valid('admin','user')
-
+        role:joi.string().required().valid('admin','user'),
+        profileImage:joi.string()
     }).required(),
     query:joi.object({
-        flag: joi.boolean().required().falsy(0,"no","nan","not","-1","n").truthy(1,"yes","y","ok","done").sensitive()
-    }).required()
+        flag: joi.boolean().falsy(0,"no","nan","not","-1","n").truthy(1,"yes","y","ok","done").sensitive()
+    })
 }
 
 
