@@ -2,11 +2,11 @@ import { compare } from "bcrypt";
 import { KEY_ACCESS, KEY_REFRESH, SALT } from "../../../config/config.service.js";
 import { Decrypt, Encrypt } from "../../common/security/encryption.security.js";
 import { Compare, Hash } from "../../common/security/hash.security.js";
-import { create, findOne } from "../../DB/base.repository.js"
+import { create, findById, findOne } from "../../DB/base.repository.js"
 import { userModel } from "../../DB/model/user.model.js"
 import jwt from 'jsonwebtoken'
 import joi from "joi"
-import {OAuth2Client} from 'google-auth-library';
+import {auth, OAuth2Client} from 'google-auth-library';
 const client=new OAuth2Client();
 
 // import { users } from '../../DB/model/index.js'
@@ -121,7 +121,7 @@ export const login=async(req, res, next) => {
       const refresh_token=jwt.sign({
         id:ExistUser._id
       },KEY_REFRESH,{
-        expiresIn:300,
+        expiresIn:36000,
         issuer:"https://localhost:3000"
       })
       res.status(200).json({tokens:{access_token,refresh_token}})
@@ -134,4 +134,65 @@ export const profile=async(req,res,next)=>{
   
 
   res.status(200).json({user:req.user})
+}
+
+export const refreshToken=async(req,res,next)=>{
+  const {authorization}=req.headers
+  console.log(req.headers)
+  console.log(authorization);
+
+  if(!authorization)
+    throw new Error("token not exist",{cause:{status:404}})
+
+  const decoded=jwt.verify(authorization,KEY_REFRESH)
+
+  if(!decoded?.id)
+    throw new Error("invalid token",{cause:{status:400}})
+
+  const user=await findOne({
+    model:userModel,
+    filter:{
+      _id:decoded.id
+    }
+  })
+
+  if(!user)
+    throw new Error("user not exist",{cause:{status:400}})
+
+  const access_token=jwt.sign(
+    {id:user._id},
+    KEY_ACCESS,
+    {
+      expiresIn:300
+    }
+  )
+
+  res.status(200).json({message:"done",access_token})
+}
+
+
+export const shareProfile=async(req,res,next)=>{
+  const {id}=req.params
+
+  let user=await findById({
+    model:userModel,
+    ID:id,
+    options:{
+      password:0,
+      isConfirmed:0,
+      _id:0,
+      provider:0,
+      createdAt:0,
+      updatedAt:0,
+      __v:0,
+      id:0
+    }
+  })
+
+  if(!user)
+    throw new Error("user not exist",{cause:{status:400}})
+
+  user.phone=await Decrypt(user.phone)
+
+  res.status(200).json({user})
 }
