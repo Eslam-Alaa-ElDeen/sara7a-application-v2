@@ -7,6 +7,7 @@ export const findOne=async({model,filter,options={}}={})=>{
 export const findById=async({model,ID,options={}}={})=>{
     return await model.findById(ID,options)
 }
-export const findByIdAndCreate=async({model,id,update,options={}}={})=>{
-    return await model.findByIdAndUpdate(id,update,{new:true,...options})
+
+export const findOnedAndUpdate=async({model,filter,update,options={}}={})=>{
+    return await model.findOneAndUpdate(filter,update,{new:true,...options})
 }

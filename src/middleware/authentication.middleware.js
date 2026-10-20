@@ -25,6 +25,9 @@ export const authentication=async(req,res,next)=>{
     if(!user)
         throw new Error("user not exist",{cause:{status:404}})
 
+    if(user?.changeCredentialAt?.getTime()>decodedToken?.iat*1000)
+        throw new Error("pls login, the token expire",{cause:{status:400}})
+
     req.user=user;
     next()
     

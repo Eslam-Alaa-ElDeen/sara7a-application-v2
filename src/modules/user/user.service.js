@@ -1,8 +1,8 @@
-import { compare } from "bcrypt";
+
 import { KEY_ACCESS, KEY_REFRESH, SALT } from "../../../config/config.service.js";
 import { Decrypt, Encrypt } from "../../common/security/encryption.security.js";
 import { Compare, Hash } from "../../common/security/hash.security.js";
-import { create, findById, findOne } from "../../DB/base.repository.js"
+import { create, findById, findOne, findOnedAndUpdate } from "../../DB/base.repository.js"
 import { userModel } from "../../DB/model/user.model.js"
 import jwt from 'jsonwebtoken'
 import joi from "joi"
@@ -195,4 +195,60 @@ export const shareProfile=async(req,res,next)=>{
   user.phone=await Decrypt(user.phone)
 
   res.status(200).json({user})
+}
+
+export const updateProfile=async(req,res,next)=>{
+
+  const{fName,lName,age,phone}=req.body;
+  let updateObj={}
+
+  if(fName!==undefined)
+    updateObj.fName=fName
+
+  if(lName!==undefined)
+    updateObj.lName=lName
+
+  if(age!==undefined)
+    updateObj.age=age
+
+  if(phone!==undefined)
+    updateObj.phone=await Encrypt(phone)
+
+  let user=await findOnedAndUpdate({
+    model:userModel,
+    filter:{
+      _id:req.user._id
+    },
+    update:updateObj
+  })
+  user.phone=await Decrypt(user.phone)
+
+  res.status(200).json({message:"done on update",user})
+  
+}
+
+export const updatePassword=async(req,res,next)=>{
+  const {oldPassword,newPassword}=req.body;
+
+  if(!await Compare(oldPassword,req.user.password))
+    throw new Error("the old password is wrong",{cause:{status:404}})
+
+  req.user.password=await Hash(newPassword,SALT)
+
+  await req.user.save()
+
+  res.status(200).json({message:"password updated",user:req.user})
+}
+
+export const logout=async(req,res,next)=>{
+
+  req.user.changeCredentialAt=Date.now();
+  await req.user.save()
+
+  res.status(200).json({message:"done on logout"})
+}
+
+
+export const rotateToken=async(req,res,next)=>{
+  
 }

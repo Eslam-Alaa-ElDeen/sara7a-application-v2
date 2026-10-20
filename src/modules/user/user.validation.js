@@ -41,3 +41,17 @@ export const shareProfileSchema ={
         id:generalRules.id.required()
     }).required()
 }
+export const updateProfileSchema ={
+    body:joi.object({
+        fName:generalRules.fName,
+        lName:generalRules.lName,
+        age:generalRules.age,
+        phone:generalRules.phone
+    }).required()
+}
+export const updatePasswordSchema ={
+    body:joi.object({
+        newPassword:generalRules.password,
+        oldPassword:generalRules.password
+    }).required()
+}

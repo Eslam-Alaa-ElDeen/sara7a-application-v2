@@ -2,11 +2,11 @@ import { RoleEnum } from "../../common/enum/user.enum.js";
 import { userModel } from "../../DB/model/user.model.js";
 import { authentication } from "../../middleware/authentication.middleware.js";
 import { authorization } from "../../middleware/authorization.middleware.js";
-import {  login, profile, refreshToken, shareProfile, signup, signupWithGmail } from "./user.service.js";
+import {  login, logout, profile, refreshToken, shareProfile, signup, signupWithGmail, updatePassword, updateProfile } from "./user.service.js";
 import { Router } from "express";
 import express from "express"
 import { Validation } from "../../middleware/validation.middleware.js";
-import { loginSchema, refreshTokenSchema, shareProfileSchema, signupSchema } from "./user.validation.js";
+import { loginSchema, refreshTokenSchema, shareProfileSchema, signupSchema, updatePasswordSchema, updateProfileSchema } from "./user.validation.js";
 import { multerLocal } from "../../middleware/multer.middleware.js";
 const router = Router();
 
@@ -25,4 +25,9 @@ router.post("/login",Validation(loginSchema),login );
 
 router.get("/profile",authentication,authorization([RoleEnum.USER]),profile)
 router.get("/share-profile/:id",Validation(shareProfileSchema),shareProfile)
+
+router.patch("/update-profile",Validation(updateProfileSchema),authentication,updateProfile)
+router.patch("/update-password",Validation(updatePasswordSchema),authentication,updatePassword)
+router.patch("/logout",authentication,logout)
+router.patch('/rotate-token',authentication,rotateToken)
 export default router;
