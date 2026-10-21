@@ -4,6 +4,7 @@ import { globalErrorHandling } from "./middleware/index.js";
 import {  userRouter } from "./modules/index.js";
 import express from "express";
 import cors from "cors"
+import { connectionRedis } from "./DB/connection.redis.js";
 
 const app = express();
 app.use(cors({
@@ -11,7 +12,8 @@ app.use(cors({
 }))
 app.use(express.json());
 
-connectionDB()
+await connectionDB()
+await connectionRedis()
 
 app.get("/", (req, res) => res.send("Hello World!"));
 app.use("/user", userRouter);

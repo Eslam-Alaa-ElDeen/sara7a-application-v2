@@ -7,7 +7,7 @@ const userSchema=new mongoose.Schema({
         type:String,
         required:true,
         minLength:2,
-        maxLenght:10,
+        maxLength:10,
         trim:true
     },
     lName:{
@@ -21,6 +21,12 @@ const userSchema=new mongoose.Schema({
         type:String,
         required:true,
         unique:true,
+        validate: {
+            validator: function(v) {
+                return v === v.toLowerCase();
+            },
+            message: "pls enter a lowerCase email like eslam@gmail.com not ESLAM@gmail.com"
+        }
     },
     password:{
         type:String,

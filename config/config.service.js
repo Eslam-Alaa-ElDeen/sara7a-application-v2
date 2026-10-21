@@ -22,4 +22,6 @@ export const IVLENGTH=parseInt(process.env.IVLENGTH)
 export const KEY_ACCESS=process.env.KEY_ACCESS
 export const KEY_REFRESH=process.env.KEY_REFRESH
 
+export const UPSTASH_REDIS_REST_URL=process.env.UPSTASH_REDIS_REST_URL
+
 
