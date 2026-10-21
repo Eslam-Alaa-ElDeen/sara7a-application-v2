@@ -8,6 +8,8 @@ import jwt from 'jsonwebtoken'
 import joi from "joi"
 import {auth, OAuth2Client} from 'google-auth-library';
 const client=new OAuth2Client();
+import{randomUUID}from "node:crypto"
+import revokeTokenModel from "../../DB/model/revokeToken.model.js";
 
 // import { users } from '../../DB/model/index.js'
 export const signup = async(req, res, next) => {
@@ -111,18 +113,22 @@ export const login=async(req, res, next) => {
     
       ExistUser.phone=await Decrypt(ExistUser.phone)
 
+      const tokenId=randomUUID()
+
       const access_token=jwt.sign({
         id:ExistUser._id
       },KEY_ACCESS,{
         expiresIn:300,
-        issuer:"https://localhost:3000"
+        issuer:"https://localhost:3000",
+        jwtid:tokenId
       })
 
       const refresh_token=jwt.sign({
         id:ExistUser._id
       },KEY_REFRESH,{
         expiresIn:36000,
-        issuer:"https://localhost:3000"
+        issuer:"https://localhost:3000",
+        jwtid:tokenId
       })
       res.status(200).json({tokens:{access_token,refresh_token}})
     } catch (error) {
@@ -242,13 +248,23 @@ export const updatePassword=async(req,res,next)=>{
 
 export const logout=async(req,res,next)=>{
 
-  req.user.changeCredentialAt=Date.now();
-  await req.user.save()
+  const {flag}=req.query;
+
+  if(flag=="all"){
+    req.user.changeCredentialAt=Date.now();
+    await req.user.save()
+  }else{
+    await create({
+      model:revokeTokenModel,
+      data:{
+        userId:req.user._id,
+        expireAt:new Date(req.decoded.exp * 1000),
+        tokenId:req.decoded.jti
+      }
+    })
+  }
+
 
   res.status(200).json({message:"done on logout"})
 }
 
-
-export const rotateToken=async(req,res,next)=>{
-  
-}

@@ -29,5 +29,4 @@ router.get("/share-profile/:id",Validation(shareProfileSchema),shareProfile)
 router.patch("/update-profile",Validation(updateProfileSchema),authentication,updateProfile)
 router.patch("/update-password",Validation(updatePasswordSchema),authentication,updatePassword)
 router.patch("/logout",authentication,logout)
-router.patch('/rotate-token',authentication,rotateToken)
 export default router;
