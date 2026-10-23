@@ -15,6 +15,7 @@ app.use(express.json());
 await connectionDB()
 await connectionRedis()
 
+
 app.get("/", (req, res) => res.send("Hello World!"));
 app.use("/user", userRouter);
 

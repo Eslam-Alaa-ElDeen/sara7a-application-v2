@@ -13,13 +13,15 @@ import {
 } from "../../DB/service/base.repository.js";
 import { userModel } from "../../DB/model/user.model.js";
 import jwt from "jsonwebtoken";
-import joi from "joi";
-import { auth, OAuth2Client } from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 const client = new OAuth2Client();
 import { randomUUID } from "node:crypto";
-import { deleteKey, keys, setValue } from "../../DB/service/redis.service.js";
+import { deleteKey, getValue, keys, setValue } from "../../DB/service/redis.service.js";
+import { createOTP, sendEmail } from "../../common/services/sendEmail.js";
+import { emailTemplate } from "../../common/services/html.template.js";
+import { eventEmitter } from "../../common/utils/events/eventEmitter.js";
+import { resolve } from "node:path";
 
-// import { users } from '../../DB/model/index.js'
 export const signup = async (req, res, next) => {
   try {
     const { fName, lName, email, password, phone, gender, DOB, age } = req.body;
@@ -32,6 +34,32 @@ export const signup = async (req, res, next) => {
     if (ExistUser) {
       throw new Error("email already exist", { cause: { status: 407 } });
     }
+
+    const otp=await createOTP();
+    await setValue({
+      key:`otp::${email}`,
+      value:await Hash(otp,SALT),
+      ttl:120
+    })
+
+    eventEmitter.emit("confirm_email",async()=>{
+      await sendEmail({
+          to: email,
+          subject: "Welcome to 3mk eslam!",
+          html: emailTemplate({
+              title: "Verify your email",
+              subtitle: "Use the code below to finish signing in.",
+              otp,
+              otpExpiry: "This code expires in 2 minutes.",
+          }),
+          attachments:[{
+            filename: "test.png",
+            path: resolve( "uploads/test.png")
+          }]
+      });
+    })
+
+
 
     const path_cover = [];
     for (const file of req.files.attachments) {
@@ -58,6 +86,38 @@ export const signup = async (req, res, next) => {
     res.status(404).json({ msg: error.message });
   }
 };
+
+export const confirmEmail = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    const otpValue=await getValue(`otp::${email}`)
+    if(!otpValue)
+      throw new Error("otp is expire",{cause:{status:400}})
+
+    if(!await Compare(otp,otpValue))
+      throw new Error("invalid otp",{cause:{status:400}})
+
+    const user=await findOnedAndUpdate({
+      model:userModel,
+      filter:{
+        email,
+        isConfirmed:false
+      },
+      update:{
+        isConfirmed:true
+      }
+    })
+
+    if(!user)
+      throw new Error("user not exist or already confirmed the email",{cause:{status:400}})
+
+    await deleteKey(`otp::${email}`)
+    res.status(200).json({msg:"done",user});
+  } catch (error) {
+    res.status(404).json({ msg: error.message });
+  }
+};
+
 export const signupWithGmail = async (req, res, next) => {
   try {
     const { idToken } = req.body;
@@ -118,6 +178,7 @@ export const signupWithGmail = async (req, res, next) => {
     res.status(404).json({ msg: error.message });
   }
 };
+
 
 export const login = async (req, res, next) => {
   try {

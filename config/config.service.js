@@ -24,4 +24,6 @@ export const KEY_REFRESH=process.env.KEY_REFRESH
 
 export const UPSTASH_REDIS_REST_URL=process.env.UPSTASH_REDIS_REST_URL
 
+export const EMAIL_PASS=process.env.EMAIL_PASS
+
 

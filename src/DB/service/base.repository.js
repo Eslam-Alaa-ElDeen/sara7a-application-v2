@@ -9,5 +9,5 @@ export const findById=async({model,ID,options={}}={})=>{
 }
 
 export const findOnedAndUpdate=async({model,filter,update,options={}}={})=>{
-    return await model.findOneAndUpdate(filter,update,{new:true,...options})
+    return await model.findOneAndUpdate(filter,update,{returnDocument:"after",...options})
 }

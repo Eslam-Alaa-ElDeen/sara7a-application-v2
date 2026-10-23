@@ -43,15 +43,21 @@ export const shareProfileSchema ={
 }
 export const updateProfileSchema ={
     body:joi.object({
-        fName:generalRules.fName,
-        lName:generalRules.lName,
-        age:generalRules.age,
-        phone:generalRules.phone
+        fName:generalRules.fName.required(),
+        lName:generalRules.lName.required(),
+        age:generalRules.age.required(),
+        phone:generalRules.phone.required()
     }).required()
 }
 export const updatePasswordSchema ={
     body:joi.object({
-        newPassword:generalRules.password,
-        oldPassword:generalRules.password
+        newPassword:generalRules.password.required(),
+        oldPassword:generalRules.password.required()
+    }).required()
+}
+export const confirmEmailSchema ={
+    body:joi.object({
+        otp:joi.string().pattern(/^[0-9]{6}$/).required(),
+        email:generalRules.email.required()
     }).required()
 }
