@@ -16,7 +16,7 @@ import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 const client = new OAuth2Client();
 import { randomUUID } from "node:crypto";
-import { deleteKey, getValue, keys, setValue } from "../../DB/service/redis.service.js";
+import { deleteKey, getValue, incr, keys, setValue, ttl } from "../../DB/service/redis.service.js";
 import { createOTP, sendEmail } from "../../common/services/sendEmail.js";
 import { emailTemplate } from "../../common/services/html.template.js";
 import { eventEmitter } from "../../common/utils/events/eventEmitter.js";
@@ -41,6 +41,11 @@ export const signup = async (req, res, next) => {
       value:await Hash(otp,SALT),
       ttl:120
     })
+    await setValue({
+      key:`otp::max::${email}`,
+      value:1,
+      ttl:60*10
+    })
 
     eventEmitter.emit("confirm_email",async()=>{
       await sendEmail({
@@ -51,11 +56,7 @@ export const signup = async (req, res, next) => {
               subtitle: "Use the code below to finish signing in.",
               otp,
               otpExpiry: "This code expires in 2 minutes.",
-          }),
-          attachments:[{
-            filename: "test.png",
-            path: resolve( "uploads/test.png")
-          }]
+          })
       });
     })
 
@@ -86,6 +87,65 @@ export const signup = async (req, res, next) => {
     res.status(404).json({ msg: error.message });
   }
 };
+
+export const reSendOtp=async (req,res,next)=>{
+  const{email}=req.body;
+  const user=await findOne({
+    model:userModel,
+    filter:{
+      email,isConfirmed:false
+    }
+  })
+
+  if(!user)
+    throw new Error("user not exist or already confirmed the email",{cause:{status:400}})
+
+  const ttlOtp=await ttl(`otp::${email}`)
+  if((ttlOtp)>0)
+    throw new Error(`can't resend otp after ${ttlOtp}`,{cause:{status:400}})
+
+  const blokeTtlOtp=await ttl(`otp::bloke::${email}`)
+  if((blokeTtlOtp)>0)
+    throw new Error(`you can resend otp after ${blokeTtlOtp}`,{cause:{status:400}})
+
+  const maxOtpTtl=await getValue(`otp::max::${email}`)
+  if(maxOtpTtl>=4){
+    await setValue({
+      key:`otp::bloke::${email}`,
+      value:1,
+      ttl:60*5
+    })
+    await setValue({
+      key:`otp::max::${email}`,
+      value:0,
+      ttl:60*10
+    })
+    throw new Error(`you have exceeded the maximum number of tries `,{cause:{status:400}})
+  }
+    const otp=await createOTP();
+    await setValue({
+      key:`otp::${email}`,
+      value:await Hash(otp,SALT),
+      ttl:120
+    })
+
+
+    eventEmitter.emit("confirm_email",async()=>{
+      await sendEmail({
+          to: email,
+          subject: "Welcome to 3mk eslam!",
+          html: emailTemplate({
+              title: "Verify your email",
+              subtitle: "Use the code below to finish signing in.",
+              otp,
+              otpExpiry: "This code expires in 2 minutes.",
+          })
+      });
+    })
+
+    await incr(`otp::max::${email}`)
+    return res.status(200).json({message:"done",user})
+}
 
 export const confirmEmail = async (req, res, next) => {
   try {

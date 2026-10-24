@@ -2,7 +2,7 @@ import { RoleEnum } from "../../common/enum/user.enum.js";
 import { userModel } from "../../DB/model/user.model.js";
 import { authentication } from "../../middleware/authentication.middleware.js";
 import { authorization } from "../../middleware/authorization.middleware.js";
-import {  confirmEmail, login, logout, profile, refreshToken, shareProfile, signup, signupWithGmail, updatePassword, updateProfile } from "./user.service.js";
+import {  confirmEmail, login, logout, profile, refreshToken, reSendOtp, shareProfile, signup, signupWithGmail, updatePassword, updateProfile } from "./user.service.js";
 import { Router } from "express";
 import express from "express"
 import { Validation } from "../../middleware/validation.middleware.js";
@@ -30,4 +30,5 @@ router.patch("/update-profile",Validation(updateProfileSchema),authentication,up
 router.patch("/update-password",Validation(updatePasswordSchema),authentication,updatePassword)
 router.patch("/logout",authentication,logout)
 router.patch("/confirm-email",Validation(confirmEmailSchema),confirmEmail)
+router.patch("/resend_otp",reSendOtp)
 export default router;
