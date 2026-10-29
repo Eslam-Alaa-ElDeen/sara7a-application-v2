@@ -8,7 +8,7 @@ const escapeHtml = (value = "") =>
     })[char]);
 
 export const emailTemplate = ({
-    preheader = "A message from 3mk eslam.",
+    preheader = "A message from sara7a app.",
     title = "Something for you",
     subtitle = "We've got an update waiting.",
     message = "Thank you for being with us.",
@@ -283,7 +283,7 @@ export const emailTemplate = ({
                                         font-weight: 800;
                                     ">3</td>
                                     <td style="padding-left: 12px; color:#ffffff; font-size:18px; font-weight:700; letter-spacing:-0.2px;">
-                                        3mk eslam
+                                        sara7a app
                                     </td>
                                     <td style="padding-left: 14px;" valign="middle">
                                         <span class="dot" style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#ffffff;"></span>
@@ -368,7 +368,7 @@ export const emailTemplate = ({
                     <tr>
                         <td align="center" style="padding: 24px 24px 26px; background-color:#faf5f5; border-top:1px solid #f0e3e5;">
                             <p style="margin:0 0 6px; color:#6E0F1F; font-size:13px; font-weight:800; letter-spacing:0.2px;">
-                                3mk eslam
+                                sara7a app
                             </p>
                             <p style="margin:0; color:#a8979b; font-size:11px; line-height:1.8;">
                                 This is an automated email, please don't reply to it directly.

@@ -55,8 +55,7 @@ const userSchema=new mongoose.Schema({
         enum:Object.values(RoleEnum),
         default:RoleEnum.USER
     },isConfirmed:{
-        type:Boolean,
-        default:false
+        type:Boolean
     },phone:{
         type:String
     },

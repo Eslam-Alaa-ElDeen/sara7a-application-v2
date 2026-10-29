@@ -17,7 +17,7 @@ export const sendEmail = async ({
     attachments = []
 }) => {
     const info = await transporter.sendMail({
-        from: `"Eslam 3laa" <ea33669900@gmail.com>`,
+        from: `"sara7a app" <ea33669900@gmail.com>`,
         to,
         subject,
         html,

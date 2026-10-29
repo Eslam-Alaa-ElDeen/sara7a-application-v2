@@ -31,3 +31,4 @@ export const multerLocal=({customPath="general",customTypes=[]})=>{
     const upload=multer({storage,fileFilter})
     return upload;
 }
+

@@ -4,6 +4,17 @@ export const create=async({model,data,options={}}={})=>{
 export const findOne=async({model,filter,options={}}={})=>{
     return await model.findOne(filter,options)
 }
+
+export const find=async({model,filter,options={}}={})=>{
+    let query= model.find(filter)
+
+    if(options?.limit) query.limit(options?.limit)
+    if(options?.skip) query.skip(options?.skip)
+    if(options?.sort) query.sort(options?.sort)
+    if(options?.populate) query.populate(options?.populate)
+
+    await query.exec();
+}
 export const findById=async({model,ID,options={}}={})=>{
     return await model.findById(ID,options)
 }
