@@ -5,15 +5,22 @@ export const findOne=async({model,filter,options={}}={})=>{
     return await model.findOne(filter,options)
 }
 
+export const deleteOne=async({model,filter,options={}}={})=>{
+    return await model.deleteOne(filter,options)
+}
+export const deleteMany=async({model,filter,options={}}={})=>{
+    return await model.deleteMany(filter,options)
+}
+
 export const find=async({model,filter,options={}}={})=>{
-    let query= model.find(filter)
+    const query= model.find(filter)
 
     if(options?.limit) query.limit(options?.limit)
     if(options?.skip) query.skip(options?.skip)
     if(options?.sort) query.sort(options?.sort)
     if(options?.populate) query.populate(options?.populate)
 
-    await query.exec();
+    return await query.exec();
 }
 export const findById=async({model,ID,options={}}={})=>{
     return await model.findById(ID,options)

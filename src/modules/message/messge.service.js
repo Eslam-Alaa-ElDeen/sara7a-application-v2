@@ -1,6 +1,7 @@
-import { create, findById } from "../../DB/index.js";
+import { create, deleteMany, deleteOne, find, findById, findOne } from "../../DB/index.js";
 import { messageModel } from "../../DB/model/message.model.js";
 import { userModel } from "../../DB/model/user.model.js";
+import { successResponse } from "../../common/utils/response/index.js";
 
 
 export const createMessage=async(req,res,next)=>{
@@ -30,7 +31,70 @@ export const createMessage=async(req,res,next)=>{
             attachments
         }
     })
-    res.status(201).json({
-        message
-    })
+    successResponse({ res, status: 201, data: message })
 }
+
+
+export const getAllMessages=async(req,res,next)=>{
+    const messages=await find({
+        model:messageModel,
+        filter:{
+            userId:req.user._id
+        }
+    })
+
+    if(!messages)
+        throw new Error("no messages for this user",{cause:{status:400}})
+
+
+    successResponse({ res, data: messages })
+}
+
+
+export const getOneMessage=async(req,res,next)=>{
+    const message=await findOne({
+        model:messageModel,
+        filter:{
+            _id:req.params.id,
+            userId:req.user._id
+        }
+    })
+
+    if(!message)
+        throw new Error("no message for this user",{cause:{status:400}})
+
+
+    successResponse({ res, data: message })
+}
+
+export const deleteOneMessage=async(req,res,next)=>{
+    const message=await deleteOne({
+        model:messageModel,
+        filter:{
+            _id:req.params.id,
+            userId:req.user._id
+        }
+    })
+
+    if(!message)
+        throw new Error("no message for this user",{cause:{status:400}})
+
+    successResponse({ res, data: { success: true, message } })
+}
+
+export const deleteManyMessage=async(req,res,next)=>{
+    const messages=await deleteMany({
+        model:messageModel,
+        filter:{
+            userId:req.user._id
+        }
+    })
+
+    if(!messages)
+        throw new Error("no message for this user",{cause:{status:400}})
+
+    successResponse({ res, data: { success: true, messages } })
+}
+
+
+messageModel.deleteMany

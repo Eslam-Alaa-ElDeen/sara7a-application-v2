@@ -9,6 +9,8 @@ import { Validation } from "../../middleware/validation.middleware.js";
 import { confirmEmailSchema, loginSchema, refreshTokenSchema, shareProfileSchema, signupSchema, updatePasswordSchema, updateProfileSchema } from "./user.validation.js";
 import { multerLocal } from "../../middleware/multer.middleware.js";
 const router = Router({
+    caseSensitive:true,
+    strict:true
 });
 
 

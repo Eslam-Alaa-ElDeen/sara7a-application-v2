@@ -1,4 +1,5 @@
 import {
+  AUDIENCE,
   KEY_ACCESS,
   KEY_REFRESH,
   SALT,
@@ -27,6 +28,7 @@ import {
 import { createOTP, sendEmail } from "../../common/services/sendEmail.js";
 import { emailTemplate } from "../../common/services/html.template.js";
 import { eventEmitter } from "../../common/utils/events/eventEmitter.js";
+import { successResponse } from "../../common/utils/response/index.js";
 import { resolve } from "node:path";
 import { sendOtp } from "./user.helper.js";
 
@@ -88,7 +90,7 @@ export const signup = async (req, res, next) => {
         coverImage: path_cover,
       },
     });
-    res.status(200).json({ data });
+    successResponse({ res, data });
   } catch (error) {
     res.status(404).json({ msg: error.message });
   }
@@ -97,13 +99,13 @@ export const signup = async (req, res, next) => {
 export const reSendOtp = async (req, res, next) => {
   const { email } = req.body;
   await await sendOtp({ email, isConfirmed: false });
-  return res.status(200).json({ message: "done" });
+  return successResponse({ res, message: "done" });
 };
 
 export const forgetPassword = async (req, res, next) => {
   const { email } = req.body;
   await await sendOtp({ email, isConfirmed: true });
-  return res.status(200).json({ message: "done" });
+  return successResponse({ res, message: "done" });
 };
 
 export const restPassword = async (req, res, next) => {
@@ -135,7 +137,7 @@ export const restPassword = async (req, res, next) => {
       });
 
     await deleteKey(`otp::${email}`);
-    res.status(200).json({ msg: "done", user });
+    successResponse({ res, message: "done", data: user });
   } catch (error) {
     res.status(404).json({ msg: error.message });
   }
@@ -167,7 +169,7 @@ export const confirmEmail = async (req, res, next) => {
       });
 
     await deleteKey(`otp::${email}`);
-    res.status(200).json({ msg: "done", user });
+    successResponse({ res, message: "done", data: user });
   } catch (error) {
     res.status(404).json({ msg: error.message });
   }
@@ -179,8 +181,7 @@ export const signupWithGmail = async (req, res, next) => {
 
     const ticket = await client.verifyIdToken({
       idToken,
-      audience:
-        "867768865965-l6sk69spvkgncdj1ni3oc3tphi8nk00b.apps.googleusercontent.com",
+      audience:AUDIENCE,
     });
     const { family_name, given_name, email, email_verified, picture } =
       ticket.getPayload();
@@ -228,7 +229,11 @@ export const signupWithGmail = async (req, res, next) => {
       },
     );
 
-    res.status(200).json({ message: "done", access_token, refresh_token });
+    successResponse({
+      res,
+      message: "done",
+      data: { access_token, refresh_token },
+    });
   } catch (error) {
     res.status(404).json({ msg: error.message });
   }
@@ -276,14 +281,14 @@ export const login = async (req, res, next) => {
         jwtid: tokenId,
       },
     );
-    res.status(200).json({ tokens: { access_token, refresh_token } });
+    successResponse({ res, data: { access_token, refresh_token } });
   } catch (error) {
     res.status(404).json({ msg: error.message });
   }
 };
 
 export const profile = async (req, res, next) => {
-  res.status(200).json({ user: req.user });
+  successResponse({ res, data: req.user });
 };
 
 export const refreshToken = async (req, res, next) => {
@@ -312,7 +317,7 @@ export const refreshToken = async (req, res, next) => {
     expiresIn: 300,
   });
 
-  res.status(200).json({ message: "done", access_token });
+  successResponse({ res, message: "done", data: { access_token } });
 };
 
 export const shareProfile = async (req, res, next) => {
@@ -337,7 +342,7 @@ export const shareProfile = async (req, res, next) => {
 
   user.phone = await Decrypt(user.phone);
 
-  res.status(200).json({ user });
+  successResponse({ res, data: user });
 };
 
 export const updateProfile = async (req, res, next) => {
@@ -361,7 +366,7 @@ export const updateProfile = async (req, res, next) => {
   });
   user.phone = await Decrypt(user.phone);
 
-  res.status(200).json({ message: "done on update", user });
+  successResponse({ res, message: "done on update", data: user });
 };
 
 export const updatePassword = async (req, res, next) => {
@@ -375,7 +380,11 @@ export const updatePassword = async (req, res, next) => {
   req.user.changeCredentialAt = new Date();
   await req.user.save();
 
-  res.status(200).json({ message: "password updated", user: req.user });
+  successResponse({
+    res,
+    message: "password updated",
+    data: req.user,
+  });
 };
 
 export const logout = async (req, res, next) => {
@@ -393,5 +402,5 @@ export const logout = async (req, res, next) => {
     });
   }
 
-  res.status(200).json({ message: "done on logout" });
+  successResponse({ res, message: "done on logout" });
 };
